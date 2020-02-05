@@ -17,65 +17,41 @@ def stripSymbols(text):
     return text
 
 
-#splits str into sentences, returns list of sentences without any punctuation
-def splitToSentences(text):
-    sentences = re.split(r'([.!?])', text)
-    sentences.pop() #removes trailing empty "sentnece"
-    phrases = []
-    for index in range(len(sentences)):
-        if re.search(r'^ +(.*?)$', sentences[index]) is not None:
-            tokens = re.search(r'^ +(.*?)$', sentences[index])
-            sentences[index] = tokens.group(1)
-        if index % 2 != 0:
-            phrases.append(sentences[index-1] + sentences[index])
-    return phrases
-
-
-'''
 def splitToWords(text):
-    sentences = re.split(r'([.!?])', text)
-    sentences.pop() #removes trailing empty "sentnece"
-    #removes preceeding whitespaces:
-    for index in range(len(sentences)):
-        if re.search(r'^ +(.*?)$', sentences[index]) is not None:
-            tokens = re.search(r'^ +(.*?)$', sentences[index])
-            sentences[index] = tokens.group(1)
-        words = re.split(r'\s', sentences[index])
-    return words
-'''
+    text = text.replace('.', ' .')
+    text = text.replace('?', ' ?')
+    text = text.replace('!', ' !')
+    return re.split(r'\s', text)
 
 
-def splitToWords(text):
-    words = re.split(r'\s', text)
-    return words
 
-
+#PROGRAM START
 #read in commandline args
 sys.argv.pop(0) #get rid of "ngram.py" arg
 gramNum = sys.argv.pop(0)
 opSentenceNum = sys.argv.pop(0)
 inputFiles = sys.argv
-fileText = []
+fullTexts = []
 
 
-#reads full text of file into single str in list "fileText"
-#therefore list "fileText" will have a single entry for each .txt file consisting of the entire text of that file
+#reads full text of file into single str in list "fullTexts"
+#therefore list "fullTexts" will have a single entry for each .txt file consisting of the entire text of that file
 for files in inputFiles:
     with open(files, 'r+') as f:
         lines = []
         for line in f:
             lines.append(line.strip())
-        fileText.append(' '.join(lines))
+        fullTexts.append(' '.join(lines))
 
 
-#calls stripSymbols() and splitToSentences for each body of text
-for index in range(len(fileText)):
-    fileText[index] = stripSymbols(fileText[index])
-    #fileText[index] = splitToSentences(fileText[index])
-    fileText[index] = splitToWords(fileText[index])
+#calls stripSymbols() and splitToWords() for each body of text
+#also puts to lower case
+for book in range(len(fullTexts)):
+    fullTexts[book] = stripSymbols(fullTexts[book].lower())
+    fullTexts[book] = splitToWords(fullTexts[book])
 
 
 
-print(fileText)
+print(fullTexts)
 
 
