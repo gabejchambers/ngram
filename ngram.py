@@ -19,8 +19,8 @@ def splitToSentences(text):
     sentences.pop() #removes trailing empty "sentnece"
     phrases = []
     for index in range(len(sentences)):
-        if re.search(r'^ (.*?)$', sentences[index]) is not None:
-            tokens = re.search(r'^ (.*?)$', sentences[index])
+        if re.search(r'^ +(.*?)$', sentences[index]) is not None:
+            tokens = re.search(r'^ +(.*?)$', sentences[index])
             sentences[index] = tokens.group(1)
         if index % 2 != 0:
             phrases.append(sentences[index-1] + sentences[index])
@@ -49,8 +49,6 @@ for files in inputFiles:
 #calls stripSymbols() for each text
 for index in range(len(fileText)):
     fileText[index] = stripSymbols(fileText[index])
-
-for index in range(len(fileText)):
     fileText[index] = splitToSentences(fileText[index])
 
 print(fileText)
