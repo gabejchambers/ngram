@@ -13,15 +13,19 @@ def stripSymbols(text):
     return text
 
 
-#splits str into sentences, returns list of sentences
+#splits str into sentences, returns list of sentences without any punctuation
 def splitToSentences(text):
-    sentences = re.split(r'[.!?]', text)
+    sentences = re.split(r'([.!?])', text)
     sentences.pop() #removes trailing empty "sentnece"
+    phrases = []
     for index in range(len(sentences)):
         if re.search(r'^ (.*?)$', sentences[index]) is not None:
             tokens = re.search(r'^ (.*?)$', sentences[index])
             sentences[index] = tokens.group(1)
-    return sentences
+        if index % 2 != 0:
+            phrases.append(sentences[index-1] + sentences[index])
+
+    return phrases
 
 
 
