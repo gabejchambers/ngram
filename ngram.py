@@ -17,11 +17,27 @@ def stripSymbols(text):
     return text
 
 
-def splitToWords(text):
-    text = text.replace('.', ' .')
-    text = text.replace('?', ' ?')
-    text = text.replace('!', ' !')
-    return re.split(r'\s', text)
+def splitToSentences(text):
+    sentences = re.split(r'([.!?])', text)
+    sentences.pop() #removes trailing empty "sentnece"
+    phrases = []
+    for index in range(len(sentences)):
+        if re.search(r'^ +(.*?)$', sentences[index]) is not None:
+            tokens = re.search(r'^ +(.*?)$', sentences[index])
+            sentences[index] = tokens.group(1)
+        if index % 2 != 0:
+            sentence = [sentences[index-1] + sentences[index]]
+            phrases.append(sentence)
+    return phrases
+
+
+def splitToWords(sentences):
+    for sentence in range(len(sentences)):
+        sentences[sentence][0] = sentences[sentence][0].replace('.', ' .')
+        sentences[sentence][0] = sentences[sentence][0].replace('?', ' ?')
+        sentences[sentence][0] = sentences[sentence][0].replace('!', ' !')
+        sentences[sentence] = re.split(r'\s', sentences[sentence][0])
+    return sentences
 
 
 
@@ -48,6 +64,7 @@ for files in inputFiles:
 #also puts to lower case
 for book in range(len(fullTexts)):
     fullTexts[book] = stripSymbols(fullTexts[book].lower())
+    fullTexts[book] = splitToSentences(fullTexts[book])
     fullTexts[book] = splitToWords(fullTexts[book])
 
 
