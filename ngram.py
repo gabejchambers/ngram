@@ -4,6 +4,10 @@
 #to run: 
 # cd "C:\Users\gabej\OneDrive\Documents\vcu\2020\spring\416\Programming Projects\ngrams\ngram"; python ngram.py 3 10 texty.txt textfile.txt
 
+#Note: thinking that tables should be in structure: myTable = {'dark': {'night':3,'storm':2}, 'storm': {'night':0,'dark':5}, 'night': {'sorm':8,'dark':0}}
+# https://www.w3schools.com/python/python_dictionaries.asp
+# https://www.programiz.com/python-programming/nested-dictionary
+
 import sys, re, os
 
 
@@ -24,18 +28,35 @@ def splitToSentences(text):
             sentences[index] = tokens.group(1)
         if index % 2 != 0:
             phrases.append(sentences[index-1] + sentences[index])
-
     return phrases
 
 
+'''
+def splitToWords(text):
+    sentences = re.split(r'([.!?])', text)
+    sentences.pop() #removes trailing empty "sentnece"
+    #removes preceeding whitespaces:
+    for index in range(len(sentences)):
+        if re.search(r'^ +(.*?)$', sentences[index]) is not None:
+            tokens = re.search(r'^ +(.*?)$', sentences[index])
+            sentences[index] = tokens.group(1)
+        words = re.split(r'\s', sentences[index])
+    return words
+'''
+
+
+def splitToWords(text):
+    words = re.split(r'\s', text)
+    return words
 
 
 #read in commandline args
 sys.argv.pop(0) #get rid of "ngram.py" arg
 gramNum = sys.argv.pop(0)
-opSentences = sys.argv.pop(0)
+opSentenceNum = sys.argv.pop(0)
 inputFiles = sys.argv
 fileText = []
+
 
 #reads full text of file into single str in list "fileText"
 #therefore list "fileText" will have a single entry for each .txt file consisting of the entire text of that file
@@ -46,10 +67,14 @@ for files in inputFiles:
             lines.append(line.strip())
         fileText.append(' '.join(lines))
 
-#calls stripSymbols() for each text
+
+#calls stripSymbols() and splitToSentences for each body of text
 for index in range(len(fileText)):
     fileText[index] = stripSymbols(fileText[index])
-    fileText[index] = splitToSentences(fileText[index])
+    #fileText[index] = splitToSentences(fileText[index])
+    fileText[index] = splitToWords(fileText[index])
+
+
 
 print(fileText)
 
