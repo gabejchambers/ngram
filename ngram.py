@@ -145,13 +145,13 @@ def generateSentences(numOpSentences, nestedDict, N):
         finished = 'false'
         for key, value in nestedDict[ngramPrev].items():
             if value >= seed and finished == 'false':
-                print(value)
-                print(seed)
+                #print(value)
+                #print(seed)
                 seed = random.random()
                 if ngramPrev != getInitiatedTuple(N):
                     sentence.append(ngramPrev[-1])
-                print(ngramPrev)
-                pretty(nestedDict[ngramPrev])
+                #print(ngramPrev)
+                #pretty(nestedDict[ngramPrev])
                 ngramPrev = updateNgramTuple(ngramPrev, key)
 
                 finished = 'true'
