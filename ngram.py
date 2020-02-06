@@ -57,12 +57,10 @@ def pretty(nestedDict):
 
 #creates the Ngram frequency table, implimentation is a nested dictionary
 def createNgramTable(fullTexts, N):
-    START = []
-    for index in range(N-1):
-        START.append('<START>')
-    prev = tuple(START)
-
+    prev = getInitiatedTuple(N)
+    START = list(prev)
     bigramTable = {prev: {}}
+
     for book in fullTexts:
         for sentence in book:
             if len(sentence) >= N: #break if the sentence is shorter than the specified Ngram size
@@ -76,6 +74,7 @@ def createNgramTable(fullTexts, N):
                     else:
                         bigramTable[prev] = {word: 1}
                     #modify tracker of previous tokens ie the key in outer dictionary
+                    '''
                     moveLeftWord = ''
                     insertWord = word
                     prevL = list(prev)
@@ -84,6 +83,8 @@ def createNgramTable(fullTexts, N):
                         prevL[index] = insertWord
                         insertWord = moveLeftWord
                     prev = tuple(prevL)
+                    '''
+                    prev = updateNgramTuple(prev, word)
                     #print(prev)
                     #tacks on '<END>' if reach punctuation
                     if prev[-1] == '.' or prev[-1] == '!' or prev[-1] == '?':
@@ -111,27 +112,51 @@ def freqToAscendRatio(nestedDict):
         for key in freqDict:
             prev += freqDict[key]/total
             freqDict[key] = prev
+    #pretty(nestedDict[('<START>',)])
     return(nestedDict)
 
 
+def getInitiatedTuple(N):
+    START = []
+    for index in range(N-1):
+        START.append('<START>')
+    return tuple(START)
 
-def generateSentences(num, nestedDict):
+
+def updateNgramTuple(ngramTuple, newWord):
+    moveLeftWord = ''
+    insertWord = newWord
+    ngramList = list(ngramTuple)
+    for index in range(len(ngramList)-1, -1, -1):
+        moveLeftWord = ngramList[index]
+        ngramList[index] = insertWord
+        insertWord = moveLeftWord
+    ngramTuple = tuple(ngramList)
+    return ngramTuple
+
+
+def generateSentences(numOpSentences, nestedDict, N):
     sentence = []
-    word = '<START>'
+    ngramPrev = getInitiatedTuple(N)
     seed = random.random()
     finished = 'false'
     sentenceCount = 0
-    while sentenceCount < num: #word != '<END>':
+    while sentenceCount < numOpSentences: 
         finished = 'false'
-        for key, value in nestedDict[word].items():
+        for key, value in nestedDict[ngramPrev].items():
             if value >= seed and finished == 'false':
+                print(value)
+                print(seed)
                 seed = random.random()
-                if word != '<START>':
-                    sentence.append(word)
-                word = key
+                if ngramPrev != getInitiatedTuple(N):
+                    sentence.append(ngramPrev[-1])
+                print(ngramPrev)
+                pretty(nestedDict[ngramPrev])
+                ngramPrev = updateNgramTuple(ngramPrev, key)
+
                 finished = 'true'
-                if word == '<END>':
-                    word = '<START>'
+                if ngramPrev[-1] == '<END>':
+                    ngramPrev = getInitiatedTuple(N)
                     sentenceCount += 1
     paragraph = ' '.join(sentence)
     #correctly format punctuation
@@ -188,7 +213,7 @@ bigramTable = createNgramTable(fullTexts, gramNum)
 #pretty(bigramTable['<START>'])
 #pretty(bigramTable['!'])
 
-opSentences = generateSentences(opSentenceNum, bigramTable)
+opSentences = generateSentences(opSentenceNum, bigramTable, gramNum)
 
 for sentence in opSentences:
     for text in sentence:
