@@ -11,15 +11,21 @@
 import sys, re, os, json, random
 
 
-#strip all symbols except [.?!]. also keeps alphanumeric and spaces
+#strip all symbols except [.?!]. also keeps alpha and spaces
 def stripSymbols(text):
     text = re.sub(r'[^a-zA-Z\s.!?]', '', text)#DIGITS REMOVED, TO ADD INSERT \d INTO REGEX
     return text
 
 
+#takes full input of full text of one manuscript and splits into sentences with no space at the beginning, and punctuation at the end
 def splitToSentences(text):
     sentences = re.split(r'([.!?])', text)
     sentences.pop() #removes trailing empty "sentnece"
+    return pastePuncToSentence(sentences)
+
+
+
+def pastePuncToSentence(sentences):
     phrases = []
     for index in range(len(sentences)):
         if re.search(r'^ +(.*?)$', sentences[index]) is not None:
@@ -112,20 +118,23 @@ def generateSentences(num, nestedDict):
                     word = '<START>'
                     sentenceCount += 1
     paragraph = ' '.join(sentence)
+    #correctly format punctuation
     paragraph = paragraph.replace(' .', '.')
     paragraph = paragraph.replace(' !', '!')
     paragraph = paragraph.replace(' ?', '?')
+    #split long text into seperate sentences to allow seperate line printing
     sentences = re.split('([.!?])', paragraph)
-    #Fix this repeated code
-    phrases = []
+    sentences = pastePuncToSentence(sentences)
+    #capatalize sentence
     for index in range(len(sentences)):
-        if re.search(r'^ +(.*?)$', sentences[index]) is not None:
-            tokens = re.search(r'^ +(.*?)$', sentences[index])
-            sentences[index] = tokens.group(1)
-        if index % 2 != 0:
-            sentence = [sentences[index-1] + sentences[index]]
-            phrases.append(sentence)
-    return phrases
+        for subindex in range(len(sentences[index])):
+            sentences[index][subindex] = capFirstLetter(sentences[index][subindex])
+    return sentences
+
+
+#capatalizes first letter of a string and returns new string
+def capFirstLetter(sentence):
+    return sentence[:1].upper() + sentence[1:]
 
 #PROGRAM START
 #read in commandline args
@@ -159,7 +168,7 @@ for book in range(len(fullTexts)):
 bigramTable = createNgramTable(fullTexts, gramNum)
 
 #pretty(bigramTable['<START>'])
-#pretty(bigramTable['white'])
+#pretty(bigramTable['an'])
 
 opSentences = generateSentences(opSentenceNum, bigramTable)
 
