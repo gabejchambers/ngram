@@ -17,14 +17,16 @@ def stripSymbols(text):
     return text
 
 
-#takes full input of full text of one manuscript and splits into sentences with no space at the beginning, and punctuation at the end
+#takes full input of full text of one manuscript and splits into sentences 
+#with no space at the beginning, and punctuation at the end
 def splitToSentences(text):
     sentences = re.split(r'([.!?])', text)
     sentences.pop() #removes trailing empty "sentnece"
     return pastePuncToSentence(sentences)
 
 
-
+#takes a list of strings which is a sentence, followed by its punctuation, 
+#and concats them so that it is a list of complete sentences
 def pastePuncToSentence(sentences):
     phrases = []
     for index in range(len(sentences)):
@@ -37,6 +39,7 @@ def pastePuncToSentence(sentences):
     return phrases
 
 
+#takes a list of strings and splits each into list of all word tokens
 def splitToWords(sentences):
     for sentence in range(len(sentences)):
         sentences[sentence][0] = sentences[sentence][0].replace('.', ' .')
@@ -46,21 +49,25 @@ def splitToWords(sentences):
     return sentences
 
 
-
+#prints a readable version of the nested dictionary
 def pretty(nestedDict):
    print(json.dumps(nestedDict, sort_keys=True, indent=8))
 
 
 
-
+#creates the Ngram frequency table, implimentation is a nested dictionary
 def createNgramTable(fullTexts, N):
-    bigramTable = {'<START>': {},
-                    '<END>': {}}
-    prev = '<START>'
+    START = []
+    for index in range(N-1):
+        START.append('<START>')
+    prev = tuple(START)
+
+    bigramTable = {prev: {}}
     for book in fullTexts:
         for sentence in book:
             if len(sentence) >= N: #break if the sentence is shorter than the specified Ngram size
                 for word in sentence:  
+                    #add occurance bigram table
                     if prev in bigramTable:
                         if word in bigramTable[prev]:
                             bigramTable[prev][word] += 1
@@ -68,9 +75,18 @@ def createNgramTable(fullTexts, N):
                             bigramTable[prev][word] = 1
                     else:
                         bigramTable[prev] = {word: 1}
-                    prev = word
-
-                    if prev == '.' or prev == '!' or prev == '?':
+                    #modify tracker of previous tokens ie the key in outer dictionary
+                    moveLeftWord = ''
+                    insertWord = word
+                    prevL = list(prev)
+                    for index in range(len(prevL)-1, -1, -1):
+                        moveLeftWord = prev[index]
+                        prevL[index] = insertWord
+                        insertWord = moveLeftWord
+                    prev = tuple(prevL)
+                    #print(prev)
+                    #tacks on '<END>' if reach punctuation
+                    if prev[-1] == '.' or prev[-1] == '!' or prev[-1] == '?':
                         word = '<END>'
                         if prev in bigramTable:
                             if word in bigramTable[prev]:
@@ -79,9 +95,9 @@ def createNgramTable(fullTexts, N):
                                 bigramTable[prev][word] = 1
                         else:
                             bigramTable[prev] = {word: 1}
-                        prev = '<START>'
+                        prev = tuple(START)
     #pretty(bigramTable)
-
+    #pretty(bigramTable[('he', 'said', 'who')])
     return(freqToAscendRatio(bigramTable))
 
                     
@@ -136,6 +152,9 @@ def generateSentences(num, nestedDict):
 def capFirstLetter(sentence):
     return sentence[:1].upper() + sentence[1:]
 
+
+
+
 #PROGRAM START
 #read in commandline args
 sys.argv.pop(0) #get rid of "ngram.py" arg
@@ -164,11 +183,10 @@ for book in range(len(fullTexts)):
 
 #print(fullTexts)#TESTING
 
-
 bigramTable = createNgramTable(fullTexts, gramNum)
 
 #pretty(bigramTable['<START>'])
-#pretty(bigramTable['an'])
+#pretty(bigramTable['!'])
 
 opSentences = generateSentences(opSentenceNum, bigramTable)
 
