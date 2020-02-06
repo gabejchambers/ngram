@@ -73,16 +73,6 @@ def createNgramTable(fullTexts, N):
                     else:
                         bigramTable[prev] = {word: 1}
                     #modify tracker of previous tokens ie the key in outer dictionary
-                    '''
-                    moveLeftWord = ''
-                    insertWord = word
-                    prevL = list(prev)
-                    for index in range(len(prevL)-1, -1, -1):
-                        moveLeftWord = prev[index]
-                        prevL[index] = insertWord
-                        insertWord = moveLeftWord
-                    prev = tuple(prevL)
-                    '''
                     prev = updateNgramTuple(prev, word)
                     #print(prev)
                     #tacks on '<END>' if reach punctuation
