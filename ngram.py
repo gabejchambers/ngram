@@ -186,6 +186,34 @@ def generateSentences(numOpSentences, nestedDict, N):
     return sentences
 
 
+def uniGenerateSentences(numOpSentences, uniTable):
+    sentences = []
+    sentence = []
+    seed = random.random()
+    word = ''
+    finished = 'false'
+    sentenceCount = 0
+    while sentenceCount < numOpSentences:
+        finished = 'false'
+        for word, ratio in uniTable.items():
+            if ratio >= seed and finished == 'false':
+                seed = random.random()
+                sentence.append(word)
+                if word == '.' or word == '!' or word == '?':
+                    finished = 'true'
+                    sentenceCount += 1
+                    sentences.append(sentence)
+                    sentence = []
+    for index in range(len(sentences)):
+        sentences[index] = ' '.join(sentences[index])
+        sentences[index] = sentences[index].replace(' .', '.')
+        sentences[index] = sentences[index].replace(' !', '!')
+        sentences[index] = sentences[index].replace(' ?', '?')
+        sentences[index] = capFirstLetter(sentences[index])
+    return sentences
+
+
+
 #capatalizes first letter of a string and returns new string
 def capFirstLetter(sentence):
     return sentence[:1].upper() + sentence[1:]
@@ -224,9 +252,10 @@ for book in range(len(fullTexts)):
 
 if gramNum == 1:
     uniTable = createUnigramTable(fullTexts, gramNum)
-    pretty(uniTable)
     uniTable = uniFreqToRatio(uniTable)
-    pretty(uniTable)
+    sentences = uniGenerateSentences(opSentenceNum, uniTable)
+    for sentence in sentences:
+        print(sentence)
 else:
     bigramTable = createNgramTable(fullTexts, gramNum)
     #pretty(bigramTable['<START>'])
