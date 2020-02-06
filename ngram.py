@@ -8,7 +8,7 @@
 # https://www.w3schools.com/python/python_dictionaries.asp
 # https://www.programiz.com/python-programming/nested-dictionary
 
-import sys, re, os
+import sys, re, os, json
 
 
 #strip all symbols except [.?!]. also keeps alphanumeric and spaces
@@ -41,10 +41,52 @@ def splitToWords(sentences):
 
 
 
+def pretty(nestedDict):
+   print(json.dumps(nestedDict, sort_keys=True, indent=8))
+
+
+
+
+def createNgramTable(fullTexts, N):
+    bigramTable = {'<START>': {},
+                    '<END>': {}}
+    prev = '<START>'
+    for book in fullTexts:
+        for sentence in book:
+            if len(sentence) >= N: #break if the sentence is shorter than the specified Ngram size
+                for word in sentence:  
+                    if prev in bigramTable:
+                        if word in bigramTable[prev]:
+                            bigramTable[prev][word] += 1
+                        else:
+                            bigramTable[prev][word] = 1
+                    else:
+                        bigramTable[prev] = {word: 1}
+                    prev = word
+
+                    if prev == '.' or prev == '!' or prev == '?':
+                        word = '<END>'
+                        if prev in bigramTable:
+                            if word in bigramTable[prev]:
+                                bigramTable[prev][word] += 1
+                            else:
+                                bigramTable[prev][word] = 1
+                        else:
+                            bigramTable[prev] = {word: 1}
+                        prev = '<START>'
+    #pretty(bigramTable)
+
+    return(bigramTable)
+
+                    
+            
+
+
+
 #PROGRAM START
 #read in commandline args
 sys.argv.pop(0) #get rid of "ngram.py" arg
-gramNum = sys.argv.pop(0)
+gramNum = int(sys.argv.pop(0))
 opSentenceNum = sys.argv.pop(0)
 inputFiles = sys.argv
 fullTexts = []
@@ -67,8 +109,9 @@ for book in range(len(fullTexts)):
     fullTexts[book] = splitToSentences(fullTexts[book])
     fullTexts[book] = splitToWords(fullTexts[book])
 
+#print(fullTexts)#TESTING
 
 
-print(fullTexts)
+bigramTable = createNgramTable(fullTexts, gramNum)
 
-
+#pretty(bigramTable['<START>'])
