@@ -10,7 +10,6 @@
 
 import sys, re, os, json, random
 
-
 #strip all symbols except [.?!]. also keeps alpha and spaces
 def stripSymbols(text):
     text = re.sub(r'[^a-zA-Z\s.!?]', '', text)#DIGITS REMOVED, TO ADD INSERT \d INTO REGEX
@@ -99,6 +98,7 @@ def createNgramTable(fullTexts, N):
                         prev = tuple(START)
     #pretty(bigramTable)
     #pretty(bigramTable[('he', 'said', 'who')])
+    #print(bigramTable[('see',)])
     return(freqToAscendRatio(bigramTable))
 
                     
@@ -213,7 +213,7 @@ bigramTable = createNgramTable(fullTexts, gramNum)
 
 #pretty(bigramTable['<START>'])
 #pretty(bigramTable['!'])
-#print(bigramTable)
+
 
 opSentences = generateSentences(opSentenceNum, bigramTable, gramNum)
 
