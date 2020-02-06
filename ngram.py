@@ -189,6 +189,7 @@ inputFiles = sys.argv
 fullTexts = []
 
 
+
 #reads full text of file into single str in list "fullTexts"
 #therefore list "fullTexts" will have a single entry for each .txt file consisting of the entire text of that file
 for files in inputFiles:
@@ -212,6 +213,7 @@ bigramTable = createNgramTable(fullTexts, gramNum)
 
 #pretty(bigramTable['<START>'])
 #pretty(bigramTable['!'])
+#print(bigramTable)
 
 opSentences = generateSentences(opSentenceNum, bigramTable, gramNum)
 
