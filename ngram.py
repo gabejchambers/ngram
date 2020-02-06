@@ -8,7 +8,7 @@
 # https://www.w3schools.com/python/python_dictionaries.asp
 # https://www.programiz.com/python-programming/nested-dictionary
 
-import sys, re, os, json
+import sys, re, os, json, random
 
 
 #strip all symbols except [.?!]. also keeps alphanumeric and spaces
@@ -76,11 +76,38 @@ def createNgramTable(fullTexts, N):
                         prev = '<START>'
     #pretty(bigramTable)
 
-    return(bigramTable)
+    return(freqToAscendRatio(bigramTable))
 
                     
             
+def freqToAscendRatio(nestedDict):
+    for word, freqDict in nestedDict.items():
+        total = 0
+        prev = 0
+        for key in freqDict:
+            total += freqDict[key]
+        for key in freqDict:
+            prev += freqDict[key]/total
+            freqDict[key] = prev
+    return(nestedDict)
 
+
+
+def generateSentences(num, nestedDict):
+    sentence = []
+    word = '<START>'
+    seed = random.random()
+    finished = 'false'
+    while word != '<END>':
+        finished = 'false'
+        for key, value in nestedDict[word].items():
+            if value >= seed and finished == 'false':
+                seed = random.random()
+                if word != '<START>':
+                    sentence.append(word)
+                word = key
+                finished = 'true'
+    return ' '.join(sentence)
 
 
 #PROGRAM START
@@ -115,3 +142,6 @@ for book in range(len(fullTexts)):
 bigramTable = createNgramTable(fullTexts, gramNum)
 
 #pretty(bigramTable['<START>'])
+#pretty(bigramTable['white'])
+
+print(generateSentences(opSentenceNum, bigramTable))
