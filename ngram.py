@@ -13,7 +13,7 @@ import sys, re, os, json, random
 
 #strip all symbols except [.?!]. also keeps alphanumeric and spaces
 def stripSymbols(text):
-    text = re.sub(r'[^a-zA-Z\d\s.!?]', '', text)
+    text = re.sub(r'[^a-zA-Z\s.!?]', '', text)#DIGITS REMOVED, TO ADD INSERT \d INTO REGEX
     return text
 
 
@@ -98,7 +98,8 @@ def generateSentences(num, nestedDict):
     word = '<START>'
     seed = random.random()
     finished = 'false'
-    while word != '<END>':
+    sentenceCount = 0
+    while sentenceCount < num: #word != '<END>':
         finished = 'false'
         for key, value in nestedDict[word].items():
             if value >= seed and finished == 'false':
@@ -107,14 +108,30 @@ def generateSentences(num, nestedDict):
                     sentence.append(word)
                 word = key
                 finished = 'true'
-    return ' '.join(sentence)
-
+                if word == '<END>':
+                    word = '<START>'
+                    sentenceCount += 1
+    paragraph = ' '.join(sentence)
+    paragraph = paragraph.replace(' .', '.')
+    paragraph = paragraph.replace(' !', '!')
+    paragraph = paragraph.replace(' ?', '?')
+    sentences = re.split('([.!?])', paragraph)
+    #Fix this repeated code
+    phrases = []
+    for index in range(len(sentences)):
+        if re.search(r'^ +(.*?)$', sentences[index]) is not None:
+            tokens = re.search(r'^ +(.*?)$', sentences[index])
+            sentences[index] = tokens.group(1)
+        if index % 2 != 0:
+            sentence = [sentences[index-1] + sentences[index]]
+            phrases.append(sentence)
+    return phrases
 
 #PROGRAM START
 #read in commandline args
 sys.argv.pop(0) #get rid of "ngram.py" arg
 gramNum = int(sys.argv.pop(0))
-opSentenceNum = sys.argv.pop(0)
+opSentenceNum = int(sys.argv.pop(0))
 inputFiles = sys.argv
 fullTexts = []
 
@@ -144,4 +161,8 @@ bigramTable = createNgramTable(fullTexts, gramNum)
 #pretty(bigramTable['<START>'])
 #pretty(bigramTable['white'])
 
-print(generateSentences(opSentenceNum, bigramTable))
+opSentences = generateSentences(opSentenceNum, bigramTable)
+
+for sentence in opSentences:
+    for text in sentence:
+        print(text)
