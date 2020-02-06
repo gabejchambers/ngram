@@ -53,6 +53,18 @@ def pretty(nestedDict):
    print(json.dumps(nestedDict, sort_keys=True, indent=8))
 
 
+def createUnigramTable(fullTexts, N):
+    uniDict = {}
+    for book in fullTexts:
+        for sentence in book:
+            if len(sentence) >= N:
+                for word in sentence:
+                    if word in uniDict:
+                        uniDict[word] += 1
+                    else:
+                        uniDict[word] = 1
+    return uniDict
+
 
 #creates the Ngram frequency table, implimentation is a nested dictionary
 def createNgramTable(fullTexts, N):
@@ -105,6 +117,17 @@ def freqToAscendRatio(nestedDict):
     #pretty(nestedDict[('<START>',)])
     return(nestedDict)
 
+
+def uniFreqToRatio(uniTable):
+    total = 0
+    prev = 0
+    for word, freq in uniTable.items():
+        total += freq
+    for word, freq in uniTable.items():
+        prev += freq/total
+        uniTable[word] = prev
+    return uniTable
+        
 
 def getInitiatedTuple(N):
     START = []
@@ -199,14 +222,16 @@ for book in range(len(fullTexts)):
 
 #print(fullTexts)#TESTING
 
-bigramTable = createNgramTable(fullTexts, gramNum)
-
-#pretty(bigramTable['<START>'])
-#pretty(bigramTable['!'])
-
-
-opSentences = generateSentences(opSentenceNum, bigramTable, gramNum)
-
-for sentence in opSentences:
-    for text in sentence:
-        print(text)
+if gramNum == 1:
+    uniTable = createUnigramTable(fullTexts, gramNum)
+    pretty(uniTable)
+    uniTable = uniFreqToRatio(uniTable)
+    pretty(uniTable)
+else:
+    bigramTable = createNgramTable(fullTexts, gramNum)
+    #pretty(bigramTable['<START>'])
+    #pretty(bigramTable['!'])
+    opSentences = generateSentences(opSentenceNum, bigramTable, gramNum)
+    for sentence in opSentences:
+        for text in sentence:
+            print(text)
