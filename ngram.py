@@ -1,12 +1,91 @@
 #Gabe Chambers - V00774588
 #cmsc 416 -- NLP
 #Project 2: Ngram
-#to run: 
-# cd "C:\Users\gabej\OneDrive\Documents\vcu\2020\spring\416\Programming Projects\ngrams\ngram"; python ngram.py 3 10 texty.txt textfile.txt
+#on own machine to run: 
+# cd "C:\Users\gabej\OneDrive\Documents\vcu\2020\spring\416\Programming Projects\ngrams\ngram"; python ngram.py 3 10 texty.txt textfile.txt quran.txt
+######################################################HEADER######################################################################
+#
+# 1) describe the problem to be solved well enough so that someone not familiar with our class could understand:
+#
+#   The goal of this program is to generate sentences based on a corpus as input.
+#   In this context, a corpus is a large set of text, in the case of this project novels from gutenburg.org totaling
+#   approximately 1,000,000 words was used.
+#   In order to generate the output sentences, the program scans through the corpus and creates a table of N-grams.
+#   An N-gram in this context is a set of n words from a given peice of text. 
+#   For example if N were to be 3, all sequences of 2 consecutive words would be stored, along with the frequencies of 
+#   the following 3rd word.
+#   By the user providing a corpus, a value of N for the ngram, and a number of output sentences, the program will build
+#   a table and then generate the output sentences by choosing one word at a time given the previously generated words
+#   based on the relative frequency of that word. 
+#   For example, in a trigram model, if a corpus had "cold dark" followed 3 times by "night", and once by "room",
+#   there would be a 75% chance for night to be produced following "cold dark", and a 25% chance of "room". The
+#   sentence ends when a punctuation is hit.
+#
+#
+#   2)  give actual examples of program input and output, along with usage instructions
+#
+#   Instruction: run with command arguments: [ngram size] [number output sentences] [textfile1] [textfile2] ... [textfileN]
+#
+#   Ex:
+#   input: python ngram.py 5 10 texty.txt textfile.txt quran.txt 
+#   Where 5 is the ngram size, 10 is the number of sentences to be output, and the three textfiles are 
+#   the full text of moby dick, the bible, and the quran.
+#
+#   output:
+#   And for the unbelievers is a disgraceful chastisement.
+#   Afterward he brought me to the gate even the gate that looketh toward the north where was the seat of the beast and upon them which worshipped his image.
+#   Of the sons also of bigvai uthai and zabbud and with them seventy males.
+#   But as for those who led the way the first of the muslims.
+#   And the sons of lotan hori and homam and timna was lotans sister.
+#   Ye have no other god that i know of but myself.
+#   We appointed the kebla which thou formerly hadst only that we might know him who followeth the right guidance.
+#   If thou return to the almighty thou shalt be built and to the temple thy foundation shall be laid.
+#   Thus saith the lord god behold i will raise up unto them.
+#   Benjamin shall ravin as a wolf in the morning he came again into the temple and when he had called the saints and widows presented her alive.
+#
+#  
+#   3) describe the algorithm you have used to solve the problem, specified in a stepwise or point by point fashion:
+#
+#   Read in all commandline args and store in variables, with all text files being stored in a list.
+#   Read full text of files into list as single strings per file.
+#   Format text into all lowercase, and splitting each string into a list of tokens while stripping 
+#   all non-punctuation symbols.
+#   The rest is handled slightly differently if it is a unigram versus any other n-gram. I will  
+#   explain general n-gram but unigram is almost identical.
+#   A table is created in the form of a nested dictionary.
+#   The outer keys are tuples containing preceeding word groups, where the start of sentences is 
+#   buffered with '<START>' strings.
+#   The values of these keys is another dictionary, where the key is any preceeding word to the
+#   given phrase, and it's value is the number of times the word occurs after that phrase.
+#   The dictionary is then converted from frequency to a ratio. The value of this ratio is 
+#   the its frequency divided by the total number of occurances of words after the given ngram phrase.
+#   This decimal is added to the value of the previous until all are summed, giving hte final value 1.0000
+#   To illustrate with an example: "dark cold" occurs 4 times in the corpus. Once followed by "room", twice by "night",
+#   and once by "presence". Below is what the dictionary would look like before and after converstion to ratio:
+#   Before:
+#   { ...
+#       ("cold", "night") : {"room": 1
+#                            "night": 2
+#                            "presence": 1} 
+#   ... } 
+#
+#   After:
+#   { ...
+#       ("cold", "night") : {"room": .250
+#                            "night": .750
+#                            "presence": 1.000} 
+#   ... } 
+#   Next, sentences are generated. A List is created to be populated with sentences.
+#   Then a loop starts, which occurs the number of times as sentences which need to be generated.
+#   In this loop, another loop checks the inner dictionary of the current ngram phrase, starting with 
+#   All '<START>' tags. For the comparison, a random number between 0 and 1 is generated, and then the 
+#   value of each word is compared against it in order. If a numbers value is greater than the random number,
+#   it is added to the sentence, the ngram phrase is updated, and a new random number is selected.
+#   When a punctuation is hit, the sentence is flagged as complete and it goes onto the new sentence
+#   until all are complete. The sentences are then formatted with capitalization, and the individual words 
+#   are stung together into a single string.
+#   Each of these sentences is then printed as output, and the program ends.
 
-#Note: thinking that tables should be in structure: myTable = {'dark': {'night':3,'storm':2}, 'storm': {'night':0,'dark':5}, 'night': {'sorm':8,'dark':0}}
-# https://www.w3schools.com/python/python_dictionaries.asp
-# https://www.programiz.com/python-programming/nested-dictionary
 
 import sys, re, os, json, random
 
@@ -248,7 +327,6 @@ for book in range(len(fullTexts)):
     fullTexts[book] = splitToSentences(fullTexts[book])
     fullTexts[book] = splitToWords(fullTexts[book])
 
-#print(fullTexts)#TESTING
 
 if gramNum == 1:
     uniTable = createUnigramTable(fullTexts, gramNum)
