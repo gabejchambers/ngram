@@ -308,6 +308,10 @@ opSentenceNum = int(sys.argv.pop(0))
 inputFiles = sys.argv
 fullTexts = []
 
+#print statements:
+print('author: Gabe Chambers - V00774588')
+print('This program generates sentences based on input via an ngram model.')
+print('command line args: ngram.py', ' ', str(gramNum), ' ', str(opSentenceNum))
 
 
 #reads full text of file into single str in list "fullTexts"
